@@ -1237,13 +1237,7 @@ eip_bool get_CIP_STRING(const CN_USINT *raw_type_and_data,
     CN_UINT        type, subtype, len, no_idea_what_this_is;
     const CN_USINT *buf;
 
-    buf = unpack_UINT(raw_type_and_data, &type);
-    if (type != T_CIP_STRUCT)
-    {
-        EIP_printf(1, "EIP get_CIP_STRING: unknown type %d\n", (int) type);
-        return false;
-    }
-    buf = unpack_UINT(buf, &subtype);
+    buf = unpack_UINT(raw_type_and_data, &subtype);
     if (subtype != T_CIP_STRUCT_STRING)
     {
         EIP_printf(1, "EIP get_CIP_STRING: unknown subtype %d\n",
@@ -1251,8 +1245,6 @@ eip_bool get_CIP_STRING(const CN_USINT *raw_type_and_data,
         return false;
     }
     buf = unpack_UINT(buf, &len);
-    buf = unpack_UINT(buf, &no_idea_what_this_is);
-
     if (len >= size)
         len = size-1;
     memcpy(buffer, buf, len);
