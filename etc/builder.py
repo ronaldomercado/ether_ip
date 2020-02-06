@@ -5,6 +5,9 @@ from iocbuilder.arginfo import *
 class EtherIPInit(Device):
     """This creates an IP connection to a plc using the ether_ip driver"""
     # Dependencies = ()
+    LibFileList = ['ether_ip']
+    DbdFileList = ['ether_ip']
+    AutoInstantiate = True
     
     def __init__(self, name, ip):
         self.__super.__init__()
