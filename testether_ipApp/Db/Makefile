@@ -22,6 +22,7 @@ DB += test.db
 DB += mod.db
 DB += brad.db
 DB += brad2.db
+DB += plcExample.template
 
 include $(TOP)/configure/RULES
 #----------------------------------------

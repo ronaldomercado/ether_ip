@@ -404,6 +404,7 @@ typedef enum
     T_CIP_INT    = 0x00C3,
     T_CIP_DINT   = 0x00C4,
     T_CIP_REAL   = 0x00CA,
+	T_CIP_WORD   = 0x00D2,
     T_CIP_BITS   = 0x00D3,
     T_CIP_STRUCT = 0x02A0
 } CIP_Type;
@@ -418,7 +419,8 @@ typedef enum
  */
 typedef enum
 {
-    T_CIP_STRUCT_STRING = 0x0FCE
+//    T_CIP_STRUCT_STRING = 0x0FCE
+	T_CIP_STRUCT_STRING = 0x00D0
 } CIP_STRUCT_Type;
 
 /* Size of appreviated type code.
