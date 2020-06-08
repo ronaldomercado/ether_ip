@@ -1104,6 +1104,14 @@ void dump_raw_CIP_data(const CN_USINT *raw_type_and_data, size_t elements)
                            type, vi);
             }
             break;
+        // Special case for reading strings from Omron PLCs at Diamond Light Source
+        case T_CIP_STRUCT_STRING:
+            char *buffer;
+            buf = unpack_UINT(buf, &len);
+            memcpy(buffer, buf, len);
+            *(buffer+len) = '\0';
+            EIP_printf(0, "STRING '%s'", (const char *)buffer);
+            break;
         default:
             EIP_printf(0, "raw CIP data, unknown type 0x%04X: ",
                        type);
