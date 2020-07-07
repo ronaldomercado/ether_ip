@@ -11,13 +11,13 @@ class EtherIPInit(Substitution, Device):
     # Template file with simple PVs collecting PLC information
     TemplateFile = "plcInfo.template"
     # Necessary for substitution object
-    Arguments = ["name", "device"]
+    Arguments = ["port", "device"]
     
-    def __init__(self, device, name, ip):
+    def __init__(self, device, port, ip):
         # Correctly fill in the template with these arguments
-        self.__super.__init__(device=device, name=name)
+        self.__super.__init__(device=device, port=port)
         self.device = device
-        self.name = name
+        self.port = port
         self.ip = ip
 
     def InitialiseOnce(self):
@@ -26,11 +26,11 @@ class EtherIPInit(Substitution, Device):
 
     def Initialise(self):
         print "# Define EtherIP to PLC connection"
-        print "drvEtherIP_define_PLC(\"{0}\", \"{1}\", 0)".format(self.name, self.ip)
+        print "drvEtherIP_define_PLC(\"{0}\", \"{1}\", 0)".format(self.port, self.ip)
         
     ArgInfo = makeArgInfo(__init__,    
         device = Simple("PV Prefix"),
-        name = Simple("Port Name"),
+        port = Simple("Port Name"),
         ip = Simple("IP Port of PLC"))
 
 class bo(AutoSubstitution):
