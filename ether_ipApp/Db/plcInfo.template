@@ -1,0 +1,23 @@
+#% macro, device, PV Prefix
+#% macro, name, EtherIP Port Name
+
+record(stringin, "$(device):PLCNAME") {
+    field(DESC, "Read PLC Name")
+    field(SCAN, "10 second")
+    field(DTYP, "EtherIP")
+    field(INP, "@$(name) PLC_Name")
+}
+
+record(stringin, "$(device):PLCSTATUS") {
+    field(DESC, "Read PLC Status")
+    field(SCAN, "10 second")
+    field(DTYP, "EtherIP")
+    field(INP, "@$(name) PLC_Status")
+}
+
+record(bi, "$(device):PLCHEALTHY") {
+    field(DESC, "Read PLC Healthy Flag")
+    field(SCAN, "2 second")
+    field(DTYP, "EtherIP")
+    field(INP, "@$(name) PLC_Healthy_Flag")
+}
