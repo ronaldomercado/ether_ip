@@ -1,6 +1,10 @@
 #% macro, device, PV Prefix
 #% macro, name, EtherIP Port Name
 
+# This associates BOY screens with the template
+# % gui, $(name=), boyembed, ether_ipApp_opi/plcInfo_embed_box.opi, device=$(device), name=$(name=)
+# % gui, $(name=), boyembed, ether_ipApp_opi/plcInfo_embed.opi, device=$(device), name=$(name=)
+
 record(stringin, "$(device):PLCNAME") {
     field(DESC, "Read PLC Name")
     field(SCAN, "10 second")
