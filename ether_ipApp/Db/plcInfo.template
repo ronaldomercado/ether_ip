@@ -2,8 +2,9 @@
 #% macro, port, EtherIP Port Name
 
 # This associates BOY screens with the template
-# % gui, $(name=), boyembed, ether_ipApp_opi/plcInfo_embed_box.opi, device=$(device), name=$(name=)
-# % gui, $(name=), boyembed, ether_ipApp_opi/plcInfo_embed.opi, device=$(device), name=$(name=)
+# % gui, $(name=), boydetail, ether_ipApp_opi/plcInfo_embed.opi, device=$(device)
+# % gui, $(name=), boyembed, ether_ipApp_opi/plcInfo_embed_box.opi, name=$(port), device=$(device)
+# % gui, $(name=), boyembed, ether_ipApp_opi/plcInfo_embed.opi, name=$(port), device=$(device)
 
 record(stringin, "$(device):PLCNAME") {
     field(DESC, "Read PLC Name")
