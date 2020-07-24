@@ -12,6 +12,7 @@ DB += ai.template
 DB += stringin.template
 DB += mbboDirect.template
 DB += mbbiDirect.template
+DB += plcInfo.template
 
 include $(TOP)/configure/RULES
 #----------------------------------------
