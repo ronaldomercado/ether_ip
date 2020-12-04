@@ -9,7 +9,7 @@ class EtherIPInit(Substitution, Device):
     DbdFileList = ['ether_ip']
     AutoInstantiate = True
     # Template file with simple PVs collecting PLC information
-    TemplateFile = "plcInfo.template"
+    TemplateFile = "ether_ip_plcInfo.template"
     # Necessary for substitution object
     Arguments = ["name", "port", "device"]
     
@@ -35,22 +35,22 @@ class EtherIPInit(Substitution, Device):
         ip = Simple("IP Port of PLC"))
 
 class bo(AutoSubstitution):
-    TemplateFile = "bo.template"
+    TemplateFile = "ether_ip_bo.template"
 
 class bi(AutoSubstitution):
-    TemplateFile = "bi.template"
+    TemplateFile = "ether_ip_bi.template"
 
 class ao(AutoSubstitution):
-    TemplateFile = "ao.template"
+    TemplateFile = "ether_ip_ao.template"
 
 class ai(AutoSubstitution):
-    TemplateFile = "ai.template"
+    TemplateFile = "ether_ip_ai.template"
 
 class stringin(AutoSubstitution):
-    TemplateFile = "stringin.template"
+    TemplateFile = "ether_ip_stringin.template"
 
 class mbboDirect(AutoSubstitution):
-    TemplateFile = "mbboDirect.template"
+    TemplateFile = "ether_ip_mbboDirect.template"
 
 class mbbiDirect(AutoSubstitution):
-    TemplateFile = "mbbiDirect.template"
+    TemplateFile = "ether_ip_mbbiDirect.template"
