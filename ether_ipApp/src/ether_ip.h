@@ -712,10 +712,10 @@ eip_bool EIP_send_connection_buffer(EIPConnection *c);
  */
 eip_bool EIP_read_connection_buffer(EIPConnection *c);
 
-/* VxWorks has no strdup */
+/* VxWorks has no POSIX strdup */
 char *EIP_strdup(const char *text);
 
-/* Like EIP_strdup, but only copies the first 'len' chars */
+/* Like EIP_strdup and POSIX strndup, but only copies the first 'len' chars */
 char *EIP_strdup_n(const char *text, size_t len);
 
 /* Read a single tag in a single CIP_ReadData request,
