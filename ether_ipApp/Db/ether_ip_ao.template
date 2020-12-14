@@ -5,7 +5,7 @@
 #% macro, tag, Tag to address on PLC
 
 record(ao, "$(record)") {
-    field(DESC, "Write number to $(tag) on PLC")
+    field(DESC, "Write number to tag on PLC")
     field(SCAN, "$(scan)")
     field(DTYP, "EtherIP")
     field(OUT, "@$(port) $(tag)")
