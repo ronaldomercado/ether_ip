@@ -26,3 +26,24 @@ class EtherIPInit(Device):
     ArgInfo = makeArgInfo(__init__,    
         name = Simple("Port Name"),
         ip = Simple("IP Port of PLC"))
+
+class bo(AutoSubstitution):
+    TemplateFile = "bo.template"
+
+class bi(AutoSubstitution):
+    TemplateFile = "bi.template"
+
+class ao(AutoSubstitution):
+    TemplateFile = "ao.template"
+
+class ai(AutoSubstitution):
+    TemplateFile = "ai.template"
+
+class stringin(AutoSubstitution):
+    TemplateFile = "stringin.template"
+
+class mbboDirect(AutoSubstitution):
+    TemplateFile = "mbboDirect.template"
+
+class mbbiDirect(AutoSubstitution):
+    TemplateFile = "mbbiDirect.template"
