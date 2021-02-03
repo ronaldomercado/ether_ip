@@ -6,7 +6,7 @@
 #% macro, nobt, Number of bits to read
 
 record(mbbiDirect, "$(record)") {
-    field(DESC, "Read bits from $(tag) on PLC, start at bit 0")
+    field(DESC, "Read bits to PLC tag")
     field(SCAN, "$(scan)")
     field(DTYP, "EtherIP")
     field(NOBT, "$(nobt)")

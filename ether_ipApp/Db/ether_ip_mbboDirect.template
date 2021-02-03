@@ -6,7 +6,7 @@
 #% macro, nobt, Number of bits to write
 
 record(mbboDirect, "$(record)") {
-    field(DESC, "Write bits to $(tag) on PLC, start at bit 0")
+    field(DESC, "Write bits to PLC tag")
     field(SCAN, "$(scan)")
     field(DTYP, "EtherIP")
     field(NOBT, "$(nobt)")
