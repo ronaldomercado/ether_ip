@@ -44,28 +44,60 @@ unsigned char *test_read_tag(const char *input_tag, const char *input_ip)
     const CN_USINT *data = 0;
     if (EIP_startup(c, ip, port, slot, timeout_ms) && tag)
     {
-
         size_t data_len;
-
         data = EIP_read_tag(c, tag, elements, &data_len, 0, 0);
-        //if (data)
-        //    dump_raw_CIP_data(data, elements);
+        if (data)
+            dump_raw_CIP_data(data, elements);
     }
     EIP_shutdown(c);
+    EIP_dispose(c);
+    EIP_free_ParsedTag (tag);
+    tag = 0;
 
     return data;
 }
 
+void log_eip_bool(eip_bool b) {
+    if (b) printf("EIP_BOOL SUCCESS\n");
+    else printf("EIP_BOOL FAIL\n");
+}
+
 int read_int_from_tag(const char *input_tag, const char *input_ip)
 {
+    int result;
     unsigned char *data = test_read_tag(input_tag, input_ip);
+    log_eip_bool(get_CIP_DINT(data, 0, &result));
+    return result;
+}
 
-    return (data[2] | (data[3] << 8));
+double read_double_from_tag(const char *input_tag, const char *input_ip)
+{
+    double result;
+    unsigned char *data = test_read_tag(input_tag, input_ip);
+    log_eip_bool(get_CIP_double(data, 0, &result));
+    return result;
+}
+
+void read_string_from_tag(const char *input_tag, const char *input_ip, char* buffer, size_t size)
+{
+    // char result[MAX_STRING_SIZE] = "myString";
+    unsigned char *data = test_read_tag(input_tag, input_ip);
+    log_eip_bool(get_CIP_STRING(data, &buffer, size));
 }
 
 int main()
 {
-    printf("%d\n", read_int_from_tag("BL06C_EA_RACK_HUMIDITY2", "10.106.3.99"));
+    printf(">>>INT/BOOL<<<\n");
+    printf("%d\n", read_int_from_tag("PLC_Interface[23].Num", "172.23.243.77"));
+    printf("%d\n", read_int_from_tag("_EIP2_TDLinkCfgErr", "172.23.243.77"));
+    printf("%d\n", read_int_from_tag("RIO_Status[1]", "172.23.243.77"));
+    printf("%d\n", read_int_from_tag("RIO_Status[2]", "172.23.243.77"));
+    printf(">>>DOUBLE<<<\n");
+    printf("%lf\n", read_double_from_tag("V[1].User_Set_Position", "172.23.243.77"));
+    printf(">>>STRING<<<\n");
+    char buffer[MAX_STRING_SIZE];
+    read_string_from_tag("V[1].Interface_Desc0", "172.23.243.77", buffer, MAX_STRING_SIZE);
+    printf("%s\n", buffer);
 
     return 0;
 }
