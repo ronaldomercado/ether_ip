@@ -115,6 +115,8 @@ int main()
     printf(">>>%s\n", buffer);
     read_string_from_tag("V[1].Interface_Desc3", "172.23.243.77", buffer, MAX_STRING_SIZE);
     printf(">>>%s\n", buffer);
+    printf("DONE\n");
+    printf("----\n");
     
 
     return 0;
