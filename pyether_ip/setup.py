@@ -8,17 +8,29 @@ extentions = [
         sources = 
         [
             "src/pyether_ip/ether_ip.pyx",
-
+            "../ether_ipApp/src/ether_ip_ctest.c",
         ],
-        libraries=["ether_ip_ctest"],
-        library_dirs=["../lib/linux-x86_64"],
-        # include_dirs=["../lib/linux-x86_64"]
+        libraries = ["Com"],
+        library_dirs = ["/dls_sw/epics/R3.14.12.7/base/lib/linux-x86_64"],
+        include_dirs = [
+            "/dls_sw/epics/R3.14.12.7/base/include",
+            "/dls_sw/epics/R3.14.12.7/base/include/os/Linux",
+        ],
+        extra_compile_args = [
+           "-g",
+           "-Wall",
+           "-Wno-unused-value",
+           "-m64",
+        ],
+        extra_link_args = [
+           "-D_GNU_SOURCE",
+           "-D_DEFAULT_SOURCE",
+           "-D_X86_64_",
+           "-DUNIX",
+           "-Dlinux",
+           "-Wl,-rpath,/dls_sw/epics/R3.14.12.7/base/lib/linux-x86_64",
+        ]
     ),
-    Extension(
-        name="hello",
-        sources=["src/pyether_ip/hello.pyx"],
-    ),
-
 ]
 
 setup(
