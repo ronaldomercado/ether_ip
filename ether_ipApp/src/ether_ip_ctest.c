@@ -80,9 +80,9 @@ double read_double_from_tag(const char *input_tag, const char *input_ip)
 
 void read_string_from_tag(const char *input_tag, const char *input_ip, char* buffer, size_t size)
 {
-    // char result[MAX_STRING_SIZE] = "myString";
     unsigned char *data = test_read_tag(input_tag, input_ip);
-    log_eip_bool(get_CIP_STRING(data, &buffer, size));
+    dump_raw_CIP_data(data, 1);
+    log_eip_bool(get_CIP_STRING(data, buffer, size));
 }
 
 int main()
@@ -92,12 +92,26 @@ int main()
     printf("%d\n", read_int_from_tag("_EIP2_TDLinkCfgErr", "172.23.243.77"));
     printf("%d\n", read_int_from_tag("RIO_Status[1]", "172.23.243.77"));
     printf("%d\n", read_int_from_tag("RIO_Status[2]", "172.23.243.77"));
+
     printf(">>>DOUBLE<<<\n");
     printf("%lf\n", read_double_from_tag("V[1].User_Set_Position", "172.23.243.77"));
+
     printf(">>>STRING<<<\n");
-    char buffer[MAX_STRING_SIZE];
+    // char* buffer = malloc(MAX_STRING_SIZE*sizeof(char));
+    // memcpy(buffer, "empty\n", 6);
+    char buffer[MAX_STRING_SIZE] = "empty";
+    printf(">>>%s\n", buffer);
     read_string_from_tag("V[1].Interface_Desc0", "172.23.243.77", buffer, MAX_STRING_SIZE);
-    printf("%s\n", buffer);
+    printf(">>>%s\n", buffer);
+    read_string_from_tag("V[1].Interface_Desc1", "172.23.243.77", buffer, MAX_STRING_SIZE);
+    printf(">>>%s\n", buffer);
+    read_string_from_tag("V[1].Interface_Desc2", "172.23.243.77", buffer, MAX_STRING_SIZE);
+    printf(">>>%s\n", buffer);
+    read_string_from_tag("V[1].Interface_Desc3", "172.23.243.77", buffer, MAX_STRING_SIZE);
+    printf(">>>%s\n", buffer);
+    read_string_from_tag("V[1].Interface_Desc3", "172.23.243.77", buffer, MAX_STRING_SIZE);
+    printf(">>>%s\n", buffer);
+    
 
     return 0;
 }
