@@ -7,7 +7,7 @@ lib/
 O.*
 
 ## cython
-pyether_ip/src/pyether_ip/*.c
+pyether_ip/src/pyether_ip/ether_ip.c
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -12,8 +12,12 @@
 #include <string.h>
 #include <stddef.h>
 #include <time.h>
+
+#include <ether_ip.h>
+
 #include "ether_ip_ctest.h"
-#include "ether_ip.c"
+
+#define MAX_STRING_SIZE 40
 
 unsigned char *test_read_tag(const char *input_tag, const char *input_ip)
 {
