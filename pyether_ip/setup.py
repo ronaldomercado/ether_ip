@@ -14,7 +14,7 @@ extentions = [
         libraries = ["Com"], #ether_ip.c dependency
         library_dirs = ["/dls_sw/epics/R3.14.12.7/base/lib/linux-x86_64"],
         include_dirs = [
-            "../ether_ipApp/src", #include <ether_ip.h>
+            "../include", #include <ether_ip.h>
             "/dls_sw/epics/R3.14.12.7/base/include",
             "/dls_sw/epics/R3.14.12.7/base/include/os/Linux",
         ],
