@@ -1,7 +1,7 @@
 cdef extern from "ether_ip_ctest.h":
-    int read_int_from_tag(const char* tag, const char* ip)
-    double read_double_from_tag(const char* tag, const char* ip)
-    void read_string_from_tag(const char *tag, const char *ip, char* buffer, int size)
+    bint read_int_from_tag(const char* tag, const char* ip, int* result)
+    bint read_double_from_tag(const char* tag, const char* ip, double* result)
+    bint read_string_from_tag(const char *tag, const char *ip, char* buffer, int size)
 
 def get_bytes(string):
     if isinstance(string, bytes):
@@ -14,17 +14,28 @@ def get_bytes(string):
 def get_double(tag, ip):
     tag = get_bytes(tag)
     ip = get_bytes(ip)
-    return read_double_from_tag(tag, ip)
+    cdef double result
+    success = read_double_from_tag(tag, ip, &result)
+    if not success:
+        raise Exception("something went wrong in read_double_from_tag")
+    return result
 
 def get_int(tag, ip):
     tag = get_bytes(tag)
     ip = get_bytes(ip)
-    return read_int_from_tag(tag, ip)
 
-cpdef char* get_string(tag, ip):
+    cdef int result
+    success = read_int_from_tag(tag, ip, &result)
+    if not success:
+        raise Exception("something went wrong in read_int_from_tag")
+    return result
+
+def get_string(tag, ip):
     cdef int size = 40
     cdef char result[40]
     tag = get_bytes(tag)
     ip = get_bytes(ip)
-    read_string_from_tag(tag, ip, result, size)
-    return result
+    success = read_string_from_tag(tag, ip, result, size)
+    if not success:
+        raise Exception("something went wrong in read_string_from_tag")
+    return result.decode() # convert to python unicode string
