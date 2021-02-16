@@ -1,5 +1,8 @@
 include pyproject.toml
 
+include src/ether_ip/*.h
+include src/ether_ip/*.c
+
 include src/pyether_ip/*.h
 include src/pyether_ip/*.c
 include src/pyether_ip/*.pyx

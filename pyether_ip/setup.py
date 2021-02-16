@@ -10,14 +10,14 @@ from epicscorelibs.config import get_config_var
 
 extentions = [
     Extension(
-        name="client",
+        name="eip_client",
         sources = 
         [
-            "src/pyether_ip/client.pyx",
+            "src/pyether_ip/eip_client.pyx",
             "src/pyether_ip/ether_ip_ctest.c",
-            "src/pyether_ip/ether_ip.c",
+            "src/ether_ip/ether_ip.c",
         ],
-        include_dirs = [include_path],
+        include_dirs = [include_path, "src/ether_ip"],
         dsos = ["epicscorelibs.lib.Com"],
         # library_dirs = [lib_path],
         extra_compile_args = [
