@@ -1,10 +1,12 @@
-from setuptools import setup, find_packages
-from distutils.extension import Extension
-from Cython.Build import cythonize
+from setuptools import find_packages
+from setuptools_dso import Extension, setup, cythonize
+
+# from distutils.extension import Extension
+# from Cython.Build import cythonize
 
 import epicscorelibs.version
 from epicscorelibs.path import include_path, lib_path
-print(lib_path)
+from epicscorelibs.config import get_config_var
 
 extentions = [
     Extension(
@@ -16,8 +18,8 @@ extentions = [
             "src/pyether_ip/ether_ip.c",
         ],
         include_dirs = [include_path],
-        library_dirs = [lib_path],
-        libraries = ["Com"], #ether_ip.c dependency
+        dsos = ["epicscorelibs.lib.Com"],
+        # library_dirs = [lib_path],
         extra_compile_args = [
            "-g",
            "-Wall",
@@ -30,7 +32,7 @@ extentions = [
            "-D_X86_64_",
            "-DUNIX",
            "-Dlinux",
-           "-Wl,-rpath," + lib_path,
+           # "-Wl,-rpath," + lib_path,
         ]
     ),
 ]
@@ -46,7 +48,7 @@ setup(
     include_package_data=True,
     install_requires=[
         epicscorelibs.version.abi_requires(),
-        "cython",
+        # "cython",
     ],
     # metadata to display on PyPI
     author="Omar Elamin",
@@ -58,5 +60,4 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    options={"bdist_wheel": {"universal": "1"}},
 )
