@@ -13,8 +13,7 @@
 #include <stddef.h>
 #include <time.h>
 
-#include <ether_ip.h>
-
+#include "ether_ip.h"
 #include "ether_ip_ctest.h"
 
 #define MAX_STRING_SIZE 40

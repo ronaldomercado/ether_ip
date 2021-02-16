@@ -4,6 +4,10 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pytest = "*"
+epicscorelibs = ">=7.0.3.99.2.0a1"
+pyether-ip = {editable = true, path = "."}
+zipp = {editable = true, path = "."}
 
 [packages]
 cython = "*"

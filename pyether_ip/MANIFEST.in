@@ -1,0 +1,6 @@
+include pyproject.toml
+
+include src/pyether_ip/*.h
+include src/pyether_ip/*.c
+include src/pyether_ip/*.pyx
+include src/pyether_ip/*.pxd
