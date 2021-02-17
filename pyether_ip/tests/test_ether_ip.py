@@ -1,6 +1,6 @@
 import pytest
 
-from eip_client import Client
+from pyether_ip.eip_client import Client
 
 def test_int_reading():
     i = Client.get_int('PLC_Interface[23].Num', '172.23.243.77')

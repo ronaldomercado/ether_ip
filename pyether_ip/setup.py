@@ -1,16 +1,13 @@
 from setuptools import find_packages
 from setuptools_dso import Extension, setup, cythonize
 
-# from distutils.extension import Extension
-# from Cython.Build import cythonize
-
 import epicscorelibs.version
-from epicscorelibs.path import include_path, lib_path
+from epicscorelibs.path import include_path
 from epicscorelibs.config import get_config_var
 
 extentions = [
     Extension(
-        name="eip_client",
+        name="pyether_ip.eip_client",
         sources = 
         [
             "src/pyether_ip/eip_client.pyx",
@@ -19,7 +16,6 @@ extentions = [
         ],
         include_dirs = [include_path, "src/ether_ip"],
         dsos = ["epicscorelibs.lib.Com"],
-        # library_dirs = [lib_path],
         extra_compile_args = [
            "-g",
            "-Wall",
@@ -32,7 +28,6 @@ extentions = [
            "-D_X86_64_",
            "-DUNIX",
            "-Dlinux",
-           # "-Wl,-rpath," + lib_path,
         ]
     ),
 ]
