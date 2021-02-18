@@ -7,7 +7,7 @@ lib/
 O.*
 
 ## cython
-pyether_ip/src/pyether_ip/eip_client.c
+pyether_ip/src/pyether_ip/*.c
 pyether_ip/src/ether_ip/*
 
 

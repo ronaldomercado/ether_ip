@@ -5,15 +5,13 @@ import epicscorelibs.version
 from epicscorelibs.path import include_path
 from epicscorelibs.config import get_config_var
 
-extentions = [
-    Extension(
-        name="pyether_ip.eip_client",
+def build_extention(extention_name, sources):
+    ext =  Extension(
+        name = extention_name,
         sources = 
         [
-            "src/pyether_ip/eip_client.pyx",
-            "src/pyether_ip/ether_ip_ctest.c",
             "src/ether_ip/ether_ip.c",
-        ],
+        ] + sources,
         include_dirs = [include_path, "src/ether_ip"],
         dsos = ["epicscorelibs.lib.Com"],
         extra_compile_args = [
@@ -29,7 +27,18 @@ extentions = [
            "-DUNIX",
            "-Dlinux",
         ]
-    ),
+    )
+    return ext
+
+extentions = [
+        build_extention(
+            extention_name="pyether_ip.eip_client",
+            sources = ["src/pyether_ip/eip_client.pyx", "src/pyether_ip/ether_ip_ctest.c"]
+        ),
+        build_extention(
+            extention_name="pyether_ip.eip_driver",
+            sources = ["src/pyether_ip/eip_driver.pyx"]
+        ),
 ]
 
 setup(

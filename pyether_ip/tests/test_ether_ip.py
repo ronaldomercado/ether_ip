@@ -1,6 +1,26 @@
 import pytest
 
 from pyether_ip.eip_client import Client
+from pyether_ip.eip_driver import EIPDriver
+
+def test_reading_int_from_driver():
+    drv = EIPDriver(b'172.23.243.77')
+    i = drv.read_tag(b'PLC_Interface[23].Num')
+    assert i == 23
+
+def test_reading_double_from_driver():
+    drv = EIPDriver(b'172.23.243.77')
+    d = drv.read_tag(b'V[1].Position', dtype="double")
+    assert isinstance(d, float)
+
+def test_reading_string_from_driver():
+    drv = EIPDriver(b'172.23.243.77')
+    s = drv.read_tag(b'V[1].Interface_Desc0', dtype="string")
+    assert isinstance(s, str)
+    assert s == "Valve"
+
+
+################################################
 
 def test_int_reading():
     i = Client.get_int('PLC_Interface[23].Num', '172.23.243.77')
@@ -9,6 +29,7 @@ def test_int_reading():
 def test_string_reading():
     s = Client.get_string('V[1].Interface_Desc0', '172.23.243.77')
     assert isinstance(s, str)
+    assert s == "Valve"
 
 def test_double_reading():
     d = Client.get_double('V[1].Position', '172.23.243.77')
