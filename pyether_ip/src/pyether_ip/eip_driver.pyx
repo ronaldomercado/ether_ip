@@ -7,6 +7,20 @@ cdef extern from "<ether_ip.h>":
     ctypedef int            CN_DINT
     ctypedef float          CN_REAL
 
+    ctypedef enum CIP_Type:
+        T_CIP_BOOL   = 0x00C1
+        T_CIP_SINT   = 0x00C2
+        T_CIP_INT    = 0x00C3
+        T_CIP_DINT   = 0x00C4
+        T_CIP_REAL   = 0x00CA
+        T_CIP_WORD   = 0x00D2
+        T_CIP_BITS   = 0x00D3
+        T_CIP_STRUCT = 0x02A0
+
+    ctypedef enum CIP_STRUCT_Type:
+        # T_CIP_STRUCT_STRING = 0x0FCE
+        T_CIP_STRUCT_STRING = 0x00D0
+
     ctypedef struct EIPConnection:
         pass
     EIPConnection* EIP_init()
@@ -57,6 +71,11 @@ cdef extern from "<ether_ip.h>":
     bint put_CIP_STRING(const CN_USINT *raw_type_and_data,
                     char *value, size_t size);
 
+    bint EIP_write_tag(EIPConnection *c, const ParsedTag *tag,
+                   CIP_Type type, size_t elements, CN_USINT *data,
+                   size_t *request_size,
+                   size_t *response_size);
+
 from libc.stdio cimport printf
 from libc.stdlib cimport malloc, free
 from libc.string cimport strcpy, strlen
@@ -97,6 +116,37 @@ cdef class EIPDriver:
         success = EIP_startup(self._conn, self._ip, port, slot, timeout_ms)
         if not success:
             raise ConnectionError("could not connect to " + str(ip))
+
+    def write_simple(self, tag, val, dtype="real"):
+        if dtype not in ["sint", "int", "dint", "real"]:
+            raise ValueError("unsupported type: " + dtype)
+
+        tag = get_bytes(tag)
+        cdef ParsedTag* parsed_tag = EIP_parse_tag(tag)
+        if parsed_tag is NULL:
+            raise RuntimeError("Failed to parse the tag " + tag.decode())
+
+
+        cdef CN_REAL real_buffer
+        cdef CN_SINT sint_buffer
+        cdef CN_INT int_buffer
+        cdef CN_DINT dint_buffer
+        if dtype == "real":
+            real_buffer = <CN_REAL>val
+            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_REAL, 1, <CN_USINT*>&real_buffer, NULL, NULL)
+        elif dtype == "sint":
+            sint_buffer = <CN_SINT>val
+            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_SINT, 1, <CN_USINT*>&sint_buffer, NULL, NULL)
+        elif dtype == "int":
+            int_buffer = <CN_INT>val
+            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_INT, 1, <CN_USINT*>&int_buffer, NULL, NULL)
+        elif dtype == "dint":
+            dint_buffer = <CN_DINT>val
+            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_DINT, 1, <CN_USINT*>&dint_buffer, NULL, NULL)
+
+        EIP_free_ParsedTag(parsed_tag)
+        if not success:
+            raise RuntimeError("did not write " + tag.decode())
 
     def read_tag(self, tag, elements=1, dtype="int"):
         global MAX_STRING_SIZE
@@ -151,7 +201,7 @@ cdef class EIPDriver:
             raise RuntimeError("could not get dint from data")
         return result
 
-    cdef double _get_cip_double(self,
+    cdef float _get_cip_double(self,
                            const CN_USINT *raw_type_and_data,
                            size_t element):
         cdef double result

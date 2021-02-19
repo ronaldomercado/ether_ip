@@ -1,7 +1,19 @@
 import pytest
+from random import random
 
 from pyether_ip.eip_client import Client
 from pyether_ip.eip_driver import EIPDriver
+
+def is_close(f1, f2, epsilon=10**-7):
+    return abs(f1 - f2) <= epsilon
+
+
+def test_write_T_CIP_REAL():
+    drv = EIPDriver('172.23.243.77')
+    expected = random()
+    drv.write_simple('V[1].User_Set_Position', expected)
+    result = drv.read_tag('V[1].User_Set_Position', dtype="double")
+    assert is_close(expected, result)
 
 def test_reading_int_from_driver():
     drv = EIPDriver('172.23.243.77')
