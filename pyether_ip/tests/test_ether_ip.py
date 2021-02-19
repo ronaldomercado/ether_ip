@@ -4,8 +4,8 @@ from pyether_ip.eip_client import Client
 from pyether_ip.eip_driver import EIPDriver
 
 def test_reading_int_from_driver():
-    drv = EIPDriver(b'172.23.243.77')
-    i = drv.read_tag(b'PLC_Interface[23].Num')
+    drv = EIPDriver('172.23.243.77')
+    i = drv.read_tag('PLC_Interface[23].Num')
     assert i == 23
 
 def test_reading_double_from_driver():
@@ -19,6 +19,9 @@ def test_reading_string_from_driver():
     assert isinstance(s, str)
     assert s == "Valve"
 
+def test_rasie_ConnectionError_for_invalid_ip():
+    with pytest.raises(ConnectionError):
+        drv = EIPDriver('172.23.243.7774hello')
 
 ################################################
 

@@ -62,6 +62,19 @@ from libc.stdlib cimport malloc, free
 from libc.string cimport strcpy, strlen
 
 DEBUG = True
+cdef int MAX_STRING_SIZE = 40
+
+def get_bytes(string):
+    """
+    Trying to turn this free function into a method for EIPDriver
+    bizarrely results in a segmentation error
+    """
+    if isinstance(string, bytes):
+        return string
+    elif isinstance(string, unicode):
+        return string.encode("utf-8")
+    else:
+        raise ValueError("input must be of type str or bytes")
 
 cdef class EIPDriver:
     cdef EIPConnection* _conn
@@ -80,21 +93,21 @@ cdef class EIPDriver:
 
 
     def __init__(self, ip, port=0xAF12, slot=0, timeout_ms=5000):
-        self._ip = bytes(ip)
+        self._ip = get_bytes(ip)
         success = EIP_startup(self._conn, self._ip, port, slot, timeout_ms)
-        print(success)
         if not success:
             raise ConnectionError("could not connect to " + str(ip))
-        print("eip driver initialized")
 
     def read_tag(self, tag, elements=1, dtype="int"):
-        cdef int string_size = 40   # ordinarily we would use a macro to set this
-        cdef char string_result[40] # unfortunately cython does not support preprocessor macros
+        global MAX_STRING_SIZE
+        cdef char* string_result
+
         if dtype not in ["int", "double", "string"]:
             raise ValueError("unsupported type: " + dtype)
 
+        tag = get_bytes(tag)
         cdef ParsedTag* parsed_tag = EIP_parse_tag(tag)
-        if parsed_tag == NULL:
+        if parsed_tag is NULL:
             raise RuntimeError("Failed to parse the tag " + tag.decode())
         cdef size_t data_len, request_size, response_size
         cdef const CN_USINT *data = EIP_read_tag(self._conn,
@@ -103,23 +116,31 @@ cdef class EIPDriver:
                                                  &data_len,
                                                  &request_size,
                                                  &response_size)
-        if data == NULL:
+        if data is NULL:
             raise RuntimeError("could not get data")
         if DEBUG:
             dump_raw_CIP_data(data, elements)
-        EIP_free_ParsedTag(parsed_tag)
 
-        if dtype == "int":
-            return self._get_cip_dint(data, 0)
-        elif dtype == "double":
-            return self._get_cip_double(data, 0)
-        elif dtype == "string":
-            success = get_CIP_STRING(data, string_result, string_size)
-            if not success:
-                raise RuntimeError("could not get string from data")
-            return string_result.decode()
-        else:
-            raise RuntimeError("illegal state: dtype not supported")
+        try:
+            if dtype == "int":
+                return self._get_cip_dint(data, 0)
+            elif dtype == "double":
+                return self._get_cip_double(data, 0)
+            elif dtype == "string":
+                string_result = <char*>malloc(MAX_STRING_SIZE*sizeof(char))
+                if string_result is NULL:
+                    raise MemoryError("memory allocation failed for string_result")
+                success = get_CIP_STRING(data, string_result, MAX_STRING_SIZE)
+                if not success:
+                    raise RuntimeError("could not get string from data")
+                pystring_result = (<bytes>string_result).decode() # make python copy of string_result
+                free(string_result)
+                return pystring_result
+            else:
+                raise RuntimeError("illegal state: dtype not supported")
+        finally:
+            EIP_free_ParsedTag(parsed_tag)
+
         
     cdef int _get_cip_dint(self,
                            const CN_USINT *raw_type_and_data,
