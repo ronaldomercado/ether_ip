@@ -134,13 +134,13 @@ cdef class EIPDriver:
             raise ConnectionError("could not connect to " + str(self._ip))
 
     def __dealloc__(self):
-        if self._ip is not NULL:
-            free(<void*>(self._ip))
-        # shut down then dealloc
+        # the order of deallocation matters here
         if self._started:
             EIP_shutdown(self._conn)
         if self._conn is not NULL:
             EIP_dispose(self._conn)
+        if self._ip is not NULL:
+            free(<void*>(self._ip))
 
 
     def write_simple(self, tag, val, dtype="real"):
