@@ -3,10 +3,15 @@ from random import random
 
 from pyether_ip.eip_client import Client
 from pyether_ip.eip_driver import EIPDriver
+from pyether_ip.eip_driver import test_copy_python_string
 
 def is_close(f1, f2, epsilon=10**-7):
     return abs(f1 - f2) <= epsilon
 
+def test_string_copying():
+    assert test_copy_python_string("hello") 
+    assert test_copy_python_string("hello\r") 
+    assert test_copy_python_string("hello\n\t\r") 
 
 def test_write_T_CIP_REAL():
     drv = EIPDriver('172.23.243.77')
@@ -21,13 +26,13 @@ def test_reading_int_from_driver():
     assert i == 23
 
 def test_reading_double_from_driver():
-    drv = EIPDriver(b'172.23.243.77')
-    d = drv.read_tag(b'V[1].Position', dtype="double")
+    drv = EIPDriver('172.23.243.77')
+    d = drv.read_tag('V[1].Position', dtype="double")
     assert isinstance(d, float)
 
 def test_reading_string_from_driver():
-    drv = EIPDriver(b'172.23.243.77')
-    s = drv.read_tag(b'V[1].Interface_Desc0', dtype="string")
+    drv = EIPDriver('172.23.243.77')
+    s = drv.read_tag('V[1].Interface_Desc0', dtype="string")
     assert isinstance(s, str)
     assert s == "Valve"
 

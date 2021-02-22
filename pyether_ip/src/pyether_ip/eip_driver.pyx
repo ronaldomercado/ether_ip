@@ -76,56 +76,84 @@ cdef extern from "<ether_ip.h>":
                    size_t *request_size,
                    size_t *response_size);
 
+cimport cython
 from libc.stdio cimport printf
 from libc.stdlib cimport malloc, free
-from libc.string cimport strcpy, strlen
+from libc.string cimport strcpy, strlen, memcpy
 
 DEBUG = True
 cdef int MAX_STRING_SIZE = 40
 
-def get_bytes(string):
-    """
-    Trying to turn this free function into a method for EIPDriver
-    bizarrely results in a segmentation error
-    """
-    if isinstance(string, bytes):
-        return string
-    elif isinstance(string, unicode):
-        return string.encode("utf-8")
-    else:
-        raise ValueError("input must be of type str or bytes")
 
+
+cdef void copy_python_string(char** c_string, unicode py_string):
+    cdef bytes py_byte_string = py_string.encode("utf8")
+    cdef int n = len(py_byte_string) + 1 # include null terminator '\0' in len
+    c_string[0] = <char*>malloc((n)*sizeof(char)) 
+    if c_string[0] is NULL:
+        raise MemoryError()
+
+    # <char*> informs the cython compiler to get the pointer to the actual bytes string
+    # <void*> will get the pointer to the bytes object thus will fail
+    # https://stackoverflow.com/a/4453355/14537811
+    memcpy(c_string[0], <char*>py_byte_string, n)
+
+def test_copy_python_string(py_string):
+    cdef char* c_string
+    copy_python_string(&c_string, py_string)
+    if not c_string:
+        return False
+    py_byte_string = c_string
+    py_unicode_string = py_byte_string.decode()
+    free(c_string)
+    return py_unicode_string == py_string
+    
+@cython.final # prevent subclassing
 cdef class EIPDriver:
     cdef EIPConnection* _conn
-    cdef bytes _ip # needs to stay alive until class instance is cleaned up
+    cdef char* _ip # needs to stay alive until class instance is cleaned up
+    cdef bint _started
 
-    def __cinit__(self, ip):
+    def __cinit__(self, ip, port=0xAF12, slot=0, timeout_ms=5000):
+        self._started = False
+        self._ip = NULL
+        self._conn = NULL
+
+        if not isinstance(ip, unicode):
+            raise ValueError("ip must be of type unicode")
+        copy_python_string(&(self._ip), ip)
+        if self._ip is NULL:
+           raise MemoryError()
+
         self._conn = EIP_init()
         if self._conn is NULL:
             raise MemoryError()
 
+        self._started = EIP_startup(self._conn, self._ip, port, slot, timeout_ms)
+        if not self._started:
+            raise ConnectionError("could not connect to " + str(self._ip))
 
     def __dealloc__(self):
-        if self._conn is not NULL:
+        if self._ip is not NULL:
+            free(<void*>(self._ip))
+        # shut down then dealloc
+        if self._started:
             EIP_shutdown(self._conn)
+        if self._conn is not NULL:
             EIP_dispose(self._conn)
 
-
-    def __init__(self, ip, port=0xAF12, slot=0, timeout_ms=5000):
-        self._ip = get_bytes(ip)
-        success = EIP_startup(self._conn, self._ip, port, slot, timeout_ms)
-        if not success:
-            raise ConnectionError("could not connect to " + str(ip))
 
     def write_simple(self, tag, val, dtype="real"):
         if dtype not in ["sint", "int", "dint", "real"]:
             raise ValueError("unsupported type: " + dtype)
 
-        tag = get_bytes(tag)
-        cdef ParsedTag* parsed_tag = EIP_parse_tag(tag)
-        if parsed_tag is NULL:
-            raise RuntimeError("Failed to parse the tag " + tag.decode())
+        if not isinstance(tag, unicode):
+            raise ValueError("tag must be of type unicode")
 
+        cdef bytes btag = tag.encode("utf-8")
+        cdef ParsedTag* parsed_tag = EIP_parse_tag(btag)
+        if parsed_tag is NULL:
+            raise RuntimeError("Failed to parse the tag " + tag)
 
         cdef CN_REAL real_buffer
         cdef CN_SINT sint_buffer
@@ -155,10 +183,14 @@ cdef class EIPDriver:
         if dtype not in ["int", "double", "string"]:
             raise ValueError("unsupported type: " + dtype)
 
-        tag = get_bytes(tag)
-        cdef ParsedTag* parsed_tag = EIP_parse_tag(tag)
+        if not isinstance(tag, unicode):
+            raise ValueError("tag must be of type unicode")
+
+        cdef bytes btag = tag.encode("utf-8")
+        cdef ParsedTag* parsed_tag = EIP_parse_tag(btag)
         if parsed_tag is NULL:
-            raise RuntimeError("Failed to parse the tag " + tag.decode())
+            raise RuntimeError("Failed to parse the tag " + tag)
+
         cdef size_t data_len, request_size, response_size
         cdef const CN_USINT *data = EIP_read_tag(self._conn,
                                                  parsed_tag,
