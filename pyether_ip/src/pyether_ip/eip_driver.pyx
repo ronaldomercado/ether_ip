@@ -143,7 +143,7 @@ cdef class EIPDriver:
             free(<void*>(self._ip))
 
 
-    def write_simple(self, tag, val, dtype="real"):
+    def write_simple(self, tag, val, dtype):
         if dtype not in ["sint", "int", "dint", "real"]:
             raise ValueError("unsupported type: " + dtype)
 
@@ -174,13 +174,13 @@ cdef class EIPDriver:
 
         EIP_free_ParsedTag(parsed_tag)
         if not success:
-            raise RuntimeError("did not write " + tag.decode())
+            raise RuntimeError("did not write " + tag)
 
-    def read_tag(self, tag, elements=1, dtype="int"):
+    def read_tag(self, tag, dtype, elements=1):
         global MAX_STRING_SIZE
         cdef char* string_result
 
-        if dtype not in ["int", "double", "string"]:
+        if dtype not in ["sint", "int", "dint", "real", "string"]:
             raise ValueError("unsupported type: " + dtype)
 
         if not isinstance(tag, unicode):
@@ -204,9 +204,10 @@ cdef class EIPDriver:
             dump_raw_CIP_data(data, elements)
 
         try:
-            if dtype == "int":
+            # cast all int types to standard pyhton int i.e. long
+            if dtype in ["sint", "int", "dint"]:
                 return self._get_cip_dint(data, 0)
-            elif dtype == "double":
+            elif dtype == "real":
                 return self._get_cip_double(data, 0)
             elif dtype == "string":
                 string_result = <char*>malloc(MAX_STRING_SIZE*sizeof(char))
@@ -233,7 +234,7 @@ cdef class EIPDriver:
             raise RuntimeError("could not get dint from data")
         return result
 
-    cdef float _get_cip_double(self,
+    cdef double _get_cip_double(self,
                            const CN_USINT *raw_type_and_data,
                            size_t element):
         cdef double result
