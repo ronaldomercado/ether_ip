@@ -22,24 +22,7 @@ ether_ip_test_LIBS += Com
 ether_ip_test_SYS_LIBS_solaris += socket
 ether_ip_test_SYS_LIBS_solaris += nsl
 
-PROD_HOST += ether_ip_ctest
-ether_ip_ctest_SRCS += ether_ip_ctest.c
-ether_ip_ctest_LIBS += Com
-
 DBD = ether_ip.dbd
-
-LIBRARY += ether_ip_ctest
-ether_ip_ctestLib_LIBS += Com
-ether_ip_ctestLib_INC += eip_bool.h
-ether_ip_ctestLib_INC += dl_list.h
-ether_ip_ctestLib_INC += ether_ip.h
-ether_ip_ctestLib_INC += drvEtherIP.h
-ether_ip_ctestLib_srcs += ether_ip_ctest.c
-ether_ip_ctestLib_srcs += dl_list.c
-ether_ip_ctestLib_srcs += ether_ip.c
-ether_ip_ctestLib_srcs += drvEtherIP.c
-ether_ip_ctestLib_srcs += devEtherIP.c
-ether_ip_ctestLib_srcs += drvEtherIPRegister.cpp
 
 LIBRARY_IOC = ether_ip
 
