@@ -1205,7 +1205,7 @@ eip_bool get_CIP_DINT(const CN_USINT *raw_type_and_data,
 {
     CN_UINT        type;
     const CN_USINT *buf;
-    CN_USINT       vs;
+    CN_SINT       vs;
     CN_INT         vi;
     CN_REAL        vr;
 
