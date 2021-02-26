@@ -1,7 +1,6 @@
 import pytest
 from random import random, randrange
 
-from pyether_ip.eip_client import Client
 from pyether_ip.eip_driver import EIPDriver
 from pyether_ip.eip_driver import test_copy_python_string
 
@@ -68,22 +67,3 @@ def test_reading_string_from_driver(drv):
 def test_rasie_ConnectionError_for_invalid_ip():
     with pytest.raises(ConnectionError):
         drv = EIPDriver('172.23.243.7774hello')
-
-################################################
-
-def test_int_reading():
-    i = Client.get_int('PLC_Interface[23].Num', '172.23.243.77')
-    assert isinstance(i, int)
-
-def test_string_reading():
-    s = Client.get_string('V[1].Interface_Desc0', '172.23.243.77')
-    assert isinstance(s, str)
-    assert s == "Valve"
-
-def test_double_reading():
-    d = Client.get_double('V[1].Position', '172.23.243.77')
-    assert isinstance(d, float)
-
-def test_mismatch_type_raises_exception():
-    with pytest.raises(Exception):
-        Client.get_int('V[1].Interface_Desc0', '172.23.243.77') # V[]..Desc0 stores a string

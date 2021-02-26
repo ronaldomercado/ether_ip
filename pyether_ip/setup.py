@@ -32,10 +32,6 @@ def build_extention(extention_name, sources):
 
 extentions = [
         build_extention(
-            extention_name="pyether_ip.eip_client",
-            sources = ["src/pyether_ip/eip_client.pyx", "src/pyether_ip/ether_ip_ctest.c"]
-        ),
-        build_extention(
             extention_name="pyether_ip.eip_driver",
             sources = ["src/pyether_ip/eip_driver.pyx"]
         ),
