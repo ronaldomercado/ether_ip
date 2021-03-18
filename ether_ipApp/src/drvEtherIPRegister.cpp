@@ -57,10 +57,12 @@ static void drvEtherIP_restartCall(const iocshArgBuf * args) {
 	drvEtherIP_restart();
 }
 
+static const iocshArg drvEtherIP_dumpArg0 = {"value", iocshArgDouble};
+static const iocshArg *const drvEtherIP_dumpArgs[1] = {&drvEtherIP_dumpArg0};
 static const iocshFuncDef drvEtherIP_dumpDef =
-    {"drvEtherIP_dump", 0, 0};
+    {"drvEtherIP_dump", 1, drvEtherIP_dumpArgs};
 static void drvEtherIP_dumpCall(const iocshArgBuf * args) {
-	drvEtherIP_dump();
+	drvEtherIP_dump(args[0].dval);
 }
 
 static const iocshFuncDef drvEtherIP_reset_statisticsDef =

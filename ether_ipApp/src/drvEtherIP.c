@@ -128,6 +128,7 @@ static void dump_TagInfo(const TagInfo *info, int level)
         printf("  (CANNOT GET DATA LOCK!)\n");
     if (level > 3)
         printf("  transfer time       : %g secs\n", info->transfer_time);
+    printf("\n");
 }
 
 static TagInfo *new_TagInfo(const char *string_tag, size_t elements)
@@ -241,7 +242,9 @@ static void dump_ScanList(const ScanList *list, int level)
     {
         for (info=DLL_first(TagInfo, &list->taginfos); info;
              info=DLL_next(TagInfo, info))
+        {
             dump_TagInfo(info, level);
+        }
     }
 }
 
@@ -1043,8 +1046,8 @@ void drvEtherIP_help()
     printf("       timeout: milliseconds\n");
     printf("    drvEtherIP_report <level>\n");
     printf("    -  level = 0..10\n");
-    printf("    drvEtherIP_dump\n");
-    printf("    -  dump all tags and values; short version of ..._report\n");
+    printf("    drvEtherIP_dump <period>\n");
+    printf("    -  dump all tags and values in the <period> sec scanlist; use <period> = -1 to dump all scanlists\n");
     printf("    drvEtherIP_reset_statistics\n");
     printf("    -  reset error counts and min/max scan times\n");
     printf("    drvEtherIP_restart\n");
@@ -1119,6 +1122,7 @@ long drvEtherIP_report(int level)
                 for (list=DLL_first(ScanList, &plc->scanlists); list;
                      list=DLL_next(ScanList, list))
                 {
+                    printf("--------------\n");
                     printf("** ");
                     dump_ScanList(list, level);
                 }
@@ -1129,7 +1133,7 @@ long drvEtherIP_report(int level)
     return 0;
 }
 
-void drvEtherIP_dump ()
+void drvEtherIP_dump (double scanlist_period)
 {
     PLC      *plc;
     ScanList *list;
@@ -1144,6 +1148,9 @@ void drvEtherIP_dump ()
         for (list=DLL_first(ScanList, &plc->scanlists); list;
              list=DLL_next(ScanList, list))
         {
+            if (list->period != scanlist_period && scanlist_period != -1) {
+                continue;
+            }
             for (info=DLL_first(TagInfo, &list->taginfos); info;
                  info=DLL_next(TagInfo, info))
             {

@@ -148,7 +148,7 @@ void drvEtherIP_init();
 
 long drvEtherIP_report(int level);
 
-void drvEtherIP_dump();
+void drvEtherIP_dump(double scanlist_period);
 
 void drvEtherIP_reset_statistics();
 
