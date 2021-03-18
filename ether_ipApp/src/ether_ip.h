@@ -174,7 +174,7 @@ void EIP_hexdump(int level, const void *_data, int len);
 extern int EIP_buffer_limit;
 
 /** Best estimate for EIP_buffer_limit */
-#define EIP_DEFAULT_BUFFER_LIMIT 480
+#define EIP_DEFAULT_BUFFER_LIMIT 502
 
 /** Used to be used to determine EIP_DEFAULT_BUFFER_LIMIT, but
  *  didn't work out
