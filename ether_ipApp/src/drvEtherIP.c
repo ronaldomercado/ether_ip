@@ -933,7 +933,9 @@ scan_loop: /* --------- The Scan Loop for one PLC -------- */
         epicsThreadSleep(delay);
     else if (delay <= -quantum)
     {
-        EIP_printf(8, "drvEtherIP scan task slow, %g sec delay\n", delay);
+        // still sleep for a short time to allow commands on the IOC consol to aquire PLC locks
+        epicsThreadSleep(quantum);
+        EIP_printf(5, "drvEtherIP scan task slow, %g sec delay\n", delay);
         ++plc->slow_scans; /* hmm, "plc" not locked... */
     }
     goto scan_loop;
