@@ -1,4 +1,6 @@
 cdef extern from "<ether_ip.h>":
+    int EIP_verbosity
+
     ctypedef signed char    CN_SINT
     ctypedef unsigned char  CN_USINT
     ctypedef unsigned short CN_UINT
@@ -81,7 +83,6 @@ from libc.stdio cimport printf
 from libc.stdlib cimport malloc, free
 from libc.string cimport strcpy, strlen, memcpy
 
-DEBUG = True
 cdef int MAX_STRING_SIZE = 40
 
 
@@ -113,11 +114,19 @@ cdef class EIPDriver:
     cdef EIPConnection* _conn
     cdef char* _ip # needs to stay alive until class instance is cleaned up
     cdef bint _started
+    cdef bint _debug
 
-    def __cinit__(self, ip, port=0xAF12, slot=0, timeout_ms=5000):
+    def __cinit__(self, ip, port=0xAF12, slot=0, timeout_ms=5000, level=4):
+
+        self._debug = False
         self._started = False
         self._ip = NULL
         self._conn = NULL
+
+        global EIP_verbosity
+        EIP_verbosity = level
+        if level >= 5:
+            self._debug = True
 
         if not isinstance(ip, unicode):
             raise ValueError("ip must be of type unicode")
@@ -143,6 +152,12 @@ cdef class EIPDriver:
             free(<void*>(self._ip))
 
 
+    def set_verbosity(self, level):
+        global EIP_verbosity
+        EIP_verbosity = level
+        if level >= 5:
+            self._debug = True
+
     def write_simple(self, tag, val, dtype):
         if dtype not in ["sint", "int", "dint", "real"]:
             raise ValueError("unsupported type: " + dtype)
@@ -159,6 +174,8 @@ cdef class EIPDriver:
         cdef CN_SINT sint_buffer
         cdef CN_INT int_buffer
         cdef CN_DINT dint_buffer
+
+        success = False
         if dtype == "real":
             real_buffer = <CN_REAL>val
             success = EIP_write_tag(self._conn, parsed_tag, T_CIP_REAL, 1, <CN_USINT*>&real_buffer, NULL, NULL)
@@ -200,7 +217,8 @@ cdef class EIPDriver:
                                                  &response_size)
         if data is NULL:
             raise RuntimeError("could not get data")
-        if DEBUG:
+
+        if self._debug:
             dump_raw_CIP_data(data, elements)
 
         try:
