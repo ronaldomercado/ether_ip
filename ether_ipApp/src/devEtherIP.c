@@ -932,7 +932,7 @@ static long analyze_link(dbCommon *rec,
 			pvt->special |= SPCO_INDEX_INCLUDED;
 			
             /* remove element number text from tag */
-            *p = '\0';
+            memcpy(p, "[0]\0", 4);
         }
     }
 

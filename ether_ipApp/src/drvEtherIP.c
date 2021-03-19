@@ -863,7 +863,25 @@ scan_loop: /* --------- The Scan Loop for one PLC -------- */
         if (epicsTimeLessThanEqual(&list->scheduled_time, &start_time))
         {
             epicsTimeGetCurrent(&list->scan_time);
+
+            char scantString[50];
+            epicsTimeStamp scan_start;
+            epicsTimeStamp scan_finish;
+            epicsTimeGetCurrent(&scan_start);
+            epicsTimeToStrftime(scantString, sizeof(scantString),
+                                "%H:%M:%S.%02f", &scan_start);
+            EIP_printf(5, "* started scanlist %g sec: %s\n", list->period, scantString);
+
             transfer_ok = process_ScanList(plc->connection, list);
+
+            epicsTimeGetCurrent(&scan_finish);
+            epicsTimeToStrftime(scantString, sizeof(scantString),
+                                "%H:%M:%S.%02f", &scan_finish);
+            EIP_printf(5, "* finished scanlist %g sec: %s\n", list->period, scantString);
+            EIP_printf(5, "\# scanlist %g took: %02f secs\n", 
+                list->period,
+                epicsTimeDiffInSeconds(&scan_finish, &scan_start));
+
             epicsTimeGetCurrent(&end_time);
             list->last_scan_time =
                 epicsTimeDiffInSeconds(&end_time, &list->scan_time);
