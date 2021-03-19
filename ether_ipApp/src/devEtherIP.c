@@ -759,7 +759,7 @@ static long analyze_link(dbCommon *rec,
     DevicePrivate  *pvt = (DevicePrivate *)rec->dpvt;
     char           *p, *end;
     size_t         i, tag_len, last_element, bit=0;
-    double         period = 0.0;
+    double         period = -1.0;
     eip_bool       single_element = false;
 
     if (pvt->link_text)
@@ -887,7 +887,7 @@ static long analyze_link(dbCommon *rec,
         }
     }
 
-    if (period <= 0.0) /* no scan flag-> get SCAN field: */
+    if (period < 0) /* no scan flag-> get SCAN field: */
     {
         period = get_period(rec);
         if (period <= 0)

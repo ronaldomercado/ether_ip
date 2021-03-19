@@ -875,6 +875,9 @@ scan_loop: /* --------- The Scan Loop for one PLC -------- */
                 list->min_scan_time = list->last_scan_time;
             if (transfer_ok) /* re-schedule exactly */
             {
+                if (list->period == 0.0) {
+                    list->enabled = false;
+                }
                 list->scheduled_time = list->scan_time;
                 epicsTimeAddSeconds(&list->scheduled_time, list->period);
             }
