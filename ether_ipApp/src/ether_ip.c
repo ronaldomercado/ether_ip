@@ -973,6 +973,8 @@ size_t CIP_Type_size(CIP_Type type)
 {
     switch (type)
     {
+
+        case T_CIP_STRING:  return sizeof(CN_USINT);
         case T_CIP_BOOL:  return sizeof(CN_USINT);
         case T_CIP_SINT:  return sizeof(CN_USINT);
         case T_CIP_INT:   return sizeof(CN_UINT);
@@ -1264,14 +1266,14 @@ eip_bool get_CIP_USINT(const CN_USINT *raw_type_and_data,
 eip_bool get_CIP_STRING(const CN_USINT *raw_type_and_data,
                         char *buffer, size_t size)
 {
-    CN_UINT        type, subtype, len;
+    CN_UINT type, len;
     const CN_USINT *buf;
 
-    buf = unpack_UINT(raw_type_and_data, &subtype);
-    if (subtype != T_CIP_STRUCT_STRING)
+    buf = unpack_UINT(raw_type_and_data, &type);
+    if (type != T_CIP_STRING)
     {
-        EIP_printf(1, "EIP get_CIP_STRING: unknown subtype %d\n",
-                   (int) subtype);
+        EIP_printf(1, "EIP get_CIP_STRING: unknown type %d\n",
+                   (int) type);
         return false;
     }
     buf = unpack_UINT(buf, &len);
@@ -1494,9 +1496,26 @@ CN_USINT *make_CIP_WriteData (CN_USINT *request, size_t buf_size, const ParsedTa
         }
         memcpy (buf, raw_data + 6, data_size);
         buf[data_size++] = '\0'; /* increase data_size by 1 to be consistent with the other types */
-    }
-    else {
+    } else if (type == T_CIP_STRING) {
+        // the standard CIP STRING is a struct with a UINT header for number of chars in string
+        // followed by a char array. i.e. STRING "abc" = "D0 00 01 00 03 00 61 62 63"
+        // where "D0 00" is type,  "01 00" is number of elements, "03 00" is number of chars
+        // and "abc" = "61 62 63"
         data_size = CIP_Type_size (type) * elements;
+        buf = make_MR_Request (buf, S_CIP_WriteData, tag_path_size (tag));
+        buf = make_tag_path (buf, tag);
+        buf = pack_UINT (buf, type);
+        buf = pack_UINT (buf, 1); // number of string elements
+        buf = pack_UINT (buf, elements); // number of chars in string
+        memcpy (buf, raw_data, data_size);
+    } else {
+        // Omron W506 manual specifies two bytes for bool writes
+        // first byte is "0x00" for false and "0x01" for true
+        // second byte is "0x01" for 'forced' and "0x00" otherwise
+        // Allen Bradlly PLCs are different Omron & CIP standard in that
+        // True is set with "0xFF" not "0x01".
+        size_t bool_forced_flag_size = (type == T_CIP_BOOL && elements == 1) ? 1 : 0;
+        data_size = CIP_Type_size (type) * elements + bool_forced_flag_size;
         buf = make_MR_Request (buf, S_CIP_WriteData, tag_path_size (tag));
         buf = make_tag_path (buf, tag);
         buf = pack_UINT (buf, type);
@@ -2949,7 +2968,11 @@ eip_bool EIP_write_tag(EIPConnection *c, const ParsedTag *tag,
                    size_t *request_size,
                    size_t *response_size)
 {
-    size_t      data_size = CIP_Type_size(type) * elements;
+    size_t string_len_header_size = type == T_CIP_STRING ? 2 : 0;
+    size_t bool_forced_flag_size = (type == T_CIP_BOOL && elements == 1) ? 1 : 0; // might be Omron specific ref W506-E1-21 p8-86
+    size_t      data_size = CIP_Type_size(type) * elements
+                            + string_len_header_size
+                            + bool_forced_flag_size;
     size_t      msg_size  = CIP_WriteData_size(tag, data_size);
     size_t      send_size = CM_Unconnected_Send_size(msg_size);
     CN_USINT    *send_request, *msg_request;

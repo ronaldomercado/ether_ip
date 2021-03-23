@@ -27,42 +27,38 @@ def drv():
 
 def get_test_tag(dtype):
     tags = {
+        "bool"   : "BOOL_Test",
         "sint"   : "SINT_Test",
         "int"    : "INT_Test",
         "dint"   : "DINT_Test",
         "real"   : "REAL_Test",
         "string" : "STRING39_Test",
+        "word"   : "WORD_Test",
+        "dword"  : "DWORD_Test",
+        "string" : "STRING39_Test"
     }
     if dtype not in tags:
-        raise ValueError("dtype not supported: " + dtype)
+        raise ValueError("dtype not found: " + dtype)
     return tags[dtype]
 
 
 dtype_d = [("sint", d) for d in [min_sint, max_sint, 0]] +\
           [("int", d) for d in [min_int, max_int, 0]] +\
           [("dint", d) for d in [min_dint, max_dint, 0]] +\
-          [("real", d) for d in [min_real, max_real, min_pos_real, 0.0]]
+          [("real", d) for d in [min_real, max_real, min_pos_real, 0.0]] +\
+          [("word", d) for d in [b"\x00\x00", b"\x10\x10"]] +\
+          [("dword", d) for d in [b"\x00\x00\x22\x33", b"\x10\x10\x11\x11"]] +\
+          [("bool", d) for d in [0, 1, True, False]] +\
+          [("string", d) for d in [b"", b"hello", b"bye"]]
 
 @pytest.mark.parametrize("dtype,d", dtype_d)
-def test_write_read_simple(drv, dtype, d):
+def test_write_read(drv, dtype, d):
     tag = get_test_tag(dtype)
     expected = d
-    drv.write_simple(tag, expected, dtype=dtype)
-    result = drv.read_tag(tag, dtype=dtype)
+    drv.write(tag, expected, dtype=dtype)
+    result = drv.read(tag, dtype=dtype)
     assert expected == result
 
-def test_reading_int_from_driver(drv):
-    i = drv.read_tag('PLC_Interface[23].Num', dtype="int")
-    assert i == 23
-
-def test_reading_double_from_driver(drv):
-    d = drv.read_tag('V[1].Position', dtype="real")
-    assert isinstance(d, float)
-
-def test_reading_string_from_driver(drv):
-    s = drv.read_tag('V[1].Interface_Desc0', dtype="string")
-    assert isinstance(s, str)
-    assert s == "Valve"
 
 def test_rasie_ConnectionError_for_invalid_ip():
     with pytest.raises(ConnectionError):

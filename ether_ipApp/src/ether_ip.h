@@ -406,7 +406,8 @@ typedef enum
     T_CIP_REAL   = 0x00CA,
 	T_CIP_WORD   = 0x00D2,
     T_CIP_BITS   = 0x00D3,
-    T_CIP_STRUCT = 0x02A0
+    T_CIP_STRUCT = 0x02A0,
+    T_CIP_STRING = 0x00D0
 } CIP_Type;
 
 /* These are experimental:

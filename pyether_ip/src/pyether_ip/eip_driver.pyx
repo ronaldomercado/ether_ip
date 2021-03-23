@@ -18,6 +18,7 @@ cdef extern from "<ether_ip.h>":
         T_CIP_WORD   = 0x00D2
         T_CIP_BITS   = 0x00D3
         T_CIP_STRUCT = 0x02A0
+        T_CIP_STRING = 0x00D0
 
     ctypedef enum CIP_STRUCT_Type:
         # T_CIP_STRUCT_STRING = 0x0FCE
@@ -109,6 +110,14 @@ def test_copy_python_string(py_string):
     free(c_string)
     return py_unicode_string == py_string
     
+cdef class Tag:
+    cdef EIPDriver _drv
+    def __cinit__(self, tag, dtype, drv, elements=1):
+        self._tag = tag
+        self._dtype = dtype
+        self._drv = drv
+        self._elements = elements
+
 @cython.final # prevent subclassing
 cdef class EIPDriver:
     cdef EIPConnection* _conn
@@ -158,8 +167,8 @@ cdef class EIPDriver:
         if level >= 5:
             self._debug = True
 
-    def write_simple(self, tag, val, dtype):
-        if dtype not in ["sint", "int", "dint", "real"]:
+    def write(self, tag, val, dtype):
+        if dtype not in ["string", "word", "dword", "bool", "sint", "int", "dint", "real"]:
             raise ValueError("unsupported type: " + dtype)
 
         if not isinstance(tag, unicode):
@@ -179,6 +188,9 @@ cdef class EIPDriver:
         if dtype == "real":
             real_buffer = <CN_REAL>val
             success = EIP_write_tag(self._conn, parsed_tag, T_CIP_REAL, 1, <CN_USINT*>&real_buffer, NULL, NULL)
+        elif dtype == "bool":
+            bool_buffer = b"\x01\x00" if <bint>val else b"\x00\x00"
+            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_BOOL, 1, <CN_USINT*>bool_buffer, NULL, NULL)
         elif dtype == "sint":
             sint_buffer = <CN_SINT>val
             success = EIP_write_tag(self._conn, parsed_tag, T_CIP_SINT, 1, <CN_USINT*>&sint_buffer, NULL, NULL)
@@ -188,17 +200,35 @@ cdef class EIPDriver:
         elif dtype == "dint":
             dint_buffer = <CN_DINT>val
             success = EIP_write_tag(self._conn, parsed_tag, T_CIP_DINT, 1, <CN_USINT*>&dint_buffer, NULL, NULL)
+        elif dtype in ["word", "dword"]:
+            word_type = T_CIP_WORD if dtype == "word" else T_CIP_BITS
+            word_n_bytes = 2 if dtype == "word" else 4
+            if not isinstance(val, bytes):
+                raise ValueError("value written to a WORD tags must be of type 'bytes'")
+            if len(val) != word_n_bytes:
+                raise ValueError("byte string provided is larger than word buffer")
+            success = EIP_write_tag(self._conn, parsed_tag, word_type, 1, <CN_USINT*>val, NULL, NULL)
+        elif dtype == "string":
+            if len(val) > MAX_STRING_SIZE or not isinstance(val, bytes):
+                raise ValueError("string must be of type 'bytes' and no larger than %d chars" % MAX_STRING_SIZE)
+            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_STRING, len(val), <CN_USINT*>val, NULL, NULL)
+        else:
+            raise ValueError("ILLIGAL STATE: dtype not found.")
 
         EIP_free_ParsedTag(parsed_tag)
         if not success:
-            raise RuntimeError("did not write " + tag)
+            raise RuntimeError("EIPDriver.write method failed to write %s to %s with dtype '%s'" % (str(val), tag, dtype))
 
-    def read_tag(self, tag, dtype, elements=1):
+    def read(self, tag, dtype, elements=1):
         global MAX_STRING_SIZE
         cdef char* string_result
+        cdef unsigned int word_result
 
-        if dtype not in ["sint", "int", "dint", "real", "string"]:
+        if dtype not in ["bool", "word", "dword", "sint", "int", "dint", "real", "string"]:
             raise ValueError("unsupported type: " + dtype)
+
+        if dtype == "string" and elements != 1:
+            raise ValueError("reading string arrays is not supported")
 
         if not isinstance(tag, unicode):
             raise ValueError("tag must be of type unicode")
@@ -215,34 +245,61 @@ cdef class EIPDriver:
                                                  &data_len,
                                                  &request_size,
                                                  &response_size)
+        EIP_free_ParsedTag(parsed_tag)
         if data is NULL:
             raise RuntimeError("could not get data")
 
         if self._debug:
             dump_raw_CIP_data(data, elements)
 
-        try:
-            # cast all int types to standard pyhton int i.e. long
-            if dtype in ["sint", "int", "dint"]:
+        # cast all int types to standard pyhton int i.e. long
+        if dtype in ["bool", "sint", "int", "dint"]:
+            if elements <= 1:
                 return self._get_cip_dint(data, 0)
-            elif dtype == "real":
-                return self._get_cip_double(data, 0)
-            elif dtype == "string":
-                string_result = <char*>malloc(MAX_STRING_SIZE*sizeof(char))
-                if string_result is NULL:
-                    raise MemoryError("memory allocation failed for string_result")
-                success = get_CIP_STRING(data, string_result, MAX_STRING_SIZE)
-                if not success:
-                    raise RuntimeError("could not get string from data")
-                pystring_result = (<bytes>string_result).decode() # make python copy of string_result
-                free(string_result)
-                return pystring_result
             else:
-                raise RuntimeError("illegal state: dtype not supported")
-        finally:
-            EIP_free_ParsedTag(parsed_tag)
+                return [self._get_cip_dint(data, i) for i in range(elements)]
+        elif dtype == "real":
+            if elements <= 1:
+                return self._get_cip_double(data, 0)
+            else:
+                return [self._get_cip_double(data, i) for i in range(elements)]
+        elif dtype in ["word", "dword"]:
+            # https://stackoverflow.com/questions/58584639/how-to-convert-a-c-binary-buffer-to-it-s-hex-representation-in-python-string
+            n_bytes = 2 if dtype == "word" else 4
+            if elements <= 1:
+                self._get_cip_word(data, 0, &word_result)
+                return (<char*>&word_result)[:n_bytes]
+            else:
+                word_list = []
+                for i in range(elements):
+                    self._get_cip_word(data, i, &word_result)
+                    word_list.append((<char*>&word_result)[:n_bytes])
+                return word_list
+
+        elif dtype == "string":
+            string_result = <char*>malloc(MAX_STRING_SIZE*sizeof(char))
+            if string_result is NULL:
+                raise MemoryError("memory allocation failed for string_result")
+            success = get_CIP_STRING(data, string_result, MAX_STRING_SIZE)
+            if not success:
+                raise RuntimeError("could not get string from data")
+            pystring_result = <bytes>string_result # make python copy of string_result
+            free(string_result)
+            return pystring_result
+        else:
+            raise RuntimeError("ILLEGAL STATE: dtype '%s' not found".format(dtype))
 
         
+    cdef bint _get_cip_word(self,
+                           const CN_USINT *raw_type_and_data,
+                           size_t element,
+                           unsigned int *result_buf
+                           ):
+        success = get_CIP_UDINT(raw_type_and_data, element, result_buf)
+        if not success:
+            raise RuntimeError("could not get word from data")
+        return success
+
     cdef int _get_cip_dint(self,
                            const CN_USINT *raw_type_and_data,
                            size_t element):
