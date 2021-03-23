@@ -2,9 +2,16 @@ TOP = ..
 
 install: build
 
-build: copy_eip_source test
+build: copy_eip_source
 	pip wheel . -w wheels
 	# pipenv run python setup.py sdist bdist_wheel
+
+
+test2: clean copy_eip_source
+	python setup.py sdist
+	pip install dist/pyether_ip-0.0.1a1.tar.gz
+	python -c 'from pyether_ip.eip_driver import EIPDriver;drv = EIPDriver("172.23.243.78", level=10);a = drv.write("STRING39_Test", b"hello", dtype="string")'
+	
 
 copy_eip_source:
 	rm src/ether_ip/ether_ip.c
@@ -21,6 +28,4 @@ clean:
 	rm --force --recursive build/
 	rm --force --recursive dist/
 	rm --force --recursive *.egg-info
-	rm src/pyether_ip/*.c
-	rm src/pyether_ip/*.so
 

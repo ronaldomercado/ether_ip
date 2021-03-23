@@ -1,9 +1,20 @@
+import os
+import sys
 from setuptools import find_packages
 from setuptools_dso import Extension, setup, cythonize
 
 import epicscorelibs.version
 from epicscorelibs.path import include_path
 from epicscorelibs.config import get_config_var
+
+# Place the directory containing _version_git on the path
+for path, _, filenames in os.walk(os.path.dirname(os.path.abspath(__file__))):
+    if "_version_git.py" in filenames:
+        sys.path.append(path)
+        break
+
+from _version_git import __version__, get_cmdclass  # noqa
+
 
 def build_extention(extention_name, sources):
     ext =  Extension(
@@ -41,7 +52,8 @@ setup(
     ext_modules = cythonize(extentions),
 
     name="pyether_ip",
-    version="0.0.1a1",
+    cmdclass=get_cmdclass(),
+    version=__version__,
     python_requires=">=3.6",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
