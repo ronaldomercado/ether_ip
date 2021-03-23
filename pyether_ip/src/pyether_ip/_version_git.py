@@ -51,9 +51,11 @@ def get_version_from_git(path=None):
                 sha1 = out
     # Replace dashes in tag for dots
     tag = tag.replace("-", ".")
+    if "dls" in tag:
+        tag = "+dls".join(tag.split("dls"))
     if plus != "0" or suffix:
         # Not on a tag, add additional info
-        tag = "%(tag)s+%(plus)s.g%(sha1)s%(suffix)s" % locals()
+        tag = "%(tag)s.plus%(plus)s.g%(sha1)s%(suffix)s" % locals()
     return tag, sha1, None
 
 

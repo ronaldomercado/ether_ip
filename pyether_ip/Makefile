@@ -3,8 +3,9 @@ TOP = ..
 install: build
 
 build: copy_eip_source
-	pip wheel . -w wheels
-	# pipenv run python setup.py sdist bdist_wheel
+	# pip wheel . -w wheels
+	pipenv install
+	pipenv run python setup.py sdist bdist_wheel
 
 
 test2: clean copy_eip_source
