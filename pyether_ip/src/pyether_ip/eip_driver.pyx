@@ -80,6 +80,9 @@ cdef extern from "<ether_ip.h>":
                    size_t *response_size);
 
 cimport cython
+from cpython cimport array
+import array
+
 from libc.stdio cimport printf
 from libc.stdlib cimport malloc, free
 from libc.string cimport strcpy, strlen, memcpy
@@ -167,9 +170,19 @@ cdef class EIPDriver:
         if level >= 5:
             self._debug = True
 
-    def write(self, tag, val, dtype):
+    def write(self, tag, val, dtype, elements=1):
         if dtype not in ["string", "word", "dword", "bool", "sint", "int", "dint", "real"]:
             raise ValueError("unsupported type: " + dtype)
+
+        if dtype == "string" and elements != 1:
+            raise ValueError("reading string arrays is not supported")
+        
+        if elements != 1:
+            if not isinstance(val, list) or len(val) != elements:
+                raise ValueError("if param 'elements' > 1, input must be list with len(list) == 'elements'")
+        else:
+            if isinstance(val, list):
+                raise ValueError("a list was provided as value while param 'elements' == 1")
 
         if not isinstance(tag, unicode):
             raise ValueError("tag must be of type unicode")
@@ -184,40 +197,147 @@ cdef class EIPDriver:
         cdef CN_INT int_buffer
         cdef CN_DINT dint_buffer
 
+        cdef array.array array_buffer
+        cdef CN_REAL[:] real_array_buffer
+        cdef CN_SINT[:] sint_array_buffer
+        cdef CN_INT[:] int_array_buffer
+        cdef CN_DINT[:] dint_array_buffer
+
         success = False
         if dtype == "real":
-            real_buffer = <CN_REAL>val
-            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_REAL, 1, <CN_USINT*>&real_buffer, NULL, NULL)
+            if elements <= 1:
+                real_buffer = <CN_REAL>val
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        T_CIP_REAL,
+                                        elements,
+                                        <CN_USINT*>&real_buffer,
+                                        NULL, NULL)
+            else:
+                array_buffer = array.array("f", val)
+                real_array_buffer = array_buffer
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        T_CIP_REAL,
+                                        elements,
+                                        <CN_USINT*>&real_array_buffer[0],
+                                        NULL, NULL)
         elif dtype == "bool":
-            bool_buffer = b"\x01\x00" if <bint>val else b"\x00\x00"
-            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_BOOL, 1, <CN_USINT*>bool_buffer, NULL, NULL)
+            if elements <= 1:
+                bool_buffer = b"\x01\x00" if <bint>val else b"\x00\x00"
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        T_CIP_BOOL,
+                                        elements,
+                                        <CN_USINT*>bool_buffer,
+                                        NULL, NULL)
+            else:
+                translate_bool = lambda b: b"\x01" if <bint>b else b"\x00"
+                bool_buffer = b"".join([translate_bool(b) for b in val])
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        T_CIP_BOOL,
+                                        elements,
+                                        <CN_USINT*>bool_buffer,
+                                        NULL, NULL)
         elif dtype == "sint":
-            sint_buffer = <CN_SINT>val
-            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_SINT, 1, <CN_USINT*>&sint_buffer, NULL, NULL)
+            if elements <= 1:
+                sint_buffer = <CN_SINT>val
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        T_CIP_SINT,
+                                        elements,
+                                        <CN_USINT*>&sint_buffer,
+                                        NULL, NULL)
+            else:
+                array_buffer = array.array("b", val)
+                sint_array_buffer = array_buffer
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        T_CIP_SINT,
+                                        elements,
+                                        <CN_USINT*>&sint_array_buffer[0],
+                                        NULL, NULL)
         elif dtype == "int":
-            int_buffer = <CN_INT>val
-            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_INT, 1, <CN_USINT*>&int_buffer, NULL, NULL)
+            if elements <= 1:
+                int_buffer = <CN_INT>val
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        T_CIP_INT,
+                                        elements,
+                                        <CN_USINT*>&int_buffer,
+                                        NULL, NULL)
+            else:
+                array_buffer = array.array("h", val)
+                int_array_buffer = array_buffer
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        T_CIP_INT,
+                                        elements,
+                                        <CN_USINT*>&int_array_buffer[0],
+                                        NULL, NULL)
         elif dtype == "dint":
-            dint_buffer = <CN_DINT>val
-            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_DINT, 1, <CN_USINT*>&dint_buffer, NULL, NULL)
+            if elements <=1:
+                dint_buffer = <CN_DINT>val
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        T_CIP_DINT,
+                                        elements,
+                                        <CN_USINT*>&dint_buffer,
+                                        NULL, NULL)
+            else:
+                array_buffer = array.array("i", val)
+                dint_array_buffer = array_buffer
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        T_CIP_DINT,
+                                        elements,
+                                        <CN_USINT*>&dint_array_buffer[0],
+                                        NULL, NULL)
         elif dtype in ["word", "dword"]:
             word_type = T_CIP_WORD if dtype == "word" else T_CIP_BITS
             word_n_bytes = 2 if dtype == "word" else 4
-            if not isinstance(val, bytes):
-                raise ValueError("value written to a WORD tags must be of type 'bytes'")
-            if len(val) != word_n_bytes:
-                raise ValueError("byte string provided is larger than word buffer")
-            success = EIP_write_tag(self._conn, parsed_tag, word_type, 1, <CN_USINT*>val, NULL, NULL)
+            if elements <=1:
+                if not isinstance(val, bytes):
+                    raise ValueError("value written to a WORD tag must be of type 'bytes'")
+                if len(val) != word_n_bytes:
+                    raise ValueError("byte string provided is larger than word buffer")
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        word_type,
+                                        elements,
+                                        <CN_USINT*>val,
+                                        NULL, NULL)
+            else:
+                for word in val:
+                    if not isinstance(word, bytes):
+                        raise ValueError("value written to a WORD tag must be of type 'bytes'")
+                    if len(word) != word_n_bytes:
+                        raise ValueError("byte string provided is larger than word buffer")
+                word_buffer = b"".join(val)
+                success = EIP_write_tag(self._conn,
+                                        parsed_tag,
+                                        word_type,
+                                        elements,
+                                        <CN_USINT*>word_buffer,
+                                        NULL, NULL)
         elif dtype == "string":
             if len(val) > MAX_STRING_SIZE or not isinstance(val, bytes):
                 raise ValueError("string must be of type 'bytes' and no larger than %d chars" % MAX_STRING_SIZE)
-            success = EIP_write_tag(self._conn, parsed_tag, T_CIP_STRING, len(val), <CN_USINT*>val, NULL, NULL)
+            success = EIP_write_tag(self._conn,
+                                    parsed_tag,
+                                    T_CIP_STRING,
+                                    len(val),
+                                    <CN_USINT*>val,
+                                    NULL, NULL)
         else:
             raise ValueError("ILLIGAL STATE: dtype not found.")
 
         EIP_free_ParsedTag(parsed_tag)
         if not success:
-            raise RuntimeError("EIPDriver.write method failed to write %s to %s with dtype '%s'" % (str(val), tag, dtype))
+            raise RuntimeError("EIPDriver.write method failed to write %s to %s with dtype '%s'"\
+                               % (str(val), tag, dtype))
+
 
     def read(self, tag, dtype, elements=1):
         global MAX_STRING_SIZE
