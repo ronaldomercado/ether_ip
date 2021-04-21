@@ -5,9 +5,9 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
-setuptools-dso = "*"
 tox = "*"
 
 [packages]
+setuptools-dso = "*"
 epicscorelibs = "==7.0.4.99.1.2"
 cython = "*"

@@ -16,9 +16,9 @@ test2: clean copy_eip_source
 
 copy_eip_source:
 	mkdir -p src/ether_ip
-	cp -r ../ether_ipApp/src/ether_ip.c src/ether_ip/ether_ip.c
-	cp -r ../ether_ipApp/src/ether_ip.h src/ether_ip/ether_ip.h
-	cp -r ../ether_ipApp/src/eip_bool.h src/ether_ip/eip_bool.h
+	/bin/cp ../ether_ipApp/src/ether_ip.c src/ether_ip/ether_ip.c
+	/bin/cp ../ether_ipApp/src/ether_ip.h src/ether_ip/ether_ip.h
+	/bin/cp ../ether_ipApp/src/eip_bool.h src/ether_ip/eip_bool.h
 
 test: copy_eip_source
 	pipenv run tox
