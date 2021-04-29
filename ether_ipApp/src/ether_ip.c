@@ -1191,7 +1191,8 @@ eip_bool get_CIP_UDINT(const CN_USINT *raw_type_and_data,
             unpack_UDINT(buf, result);
             return true;
 		case T_CIP_WORD:
-            unpack_UINT(buf, result);
+            unpack_UINT(buf, &vi);
+            *result = (CN_UDINT) vi; 
             return true;	
         case T_CIP_REAL:
             unpack_REAL(buf, &vr);
