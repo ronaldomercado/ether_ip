@@ -8,17 +8,14 @@ class EtherIPInit(Substitution, Device):
     LibFileList = ['ether_ip']
     DbdFileList = ['ether_ip']
     AutoInstantiate = True
-    # Template file with simple PVs collecting PLC information
-    TemplateFile = "ether_ip_plcInfo.template"
-    # Necessary for substitution object
-    Arguments = ["name", "port", "device"]
     
-    def __init__(self, name, device, port, ip):
-        # Correctly fill in the template with these arguments
-        self.__super.__init__(name=name, device=device, port=port)
+    def __init__(self, name, device, port, ip, PLCinfo=True):
         self.device = device
         self.port = port
         self.ip = ip
+        if (PLCinfo):
+            # Fill in the template with these arguments
+            self.template = _PLCinfo(name=name, device=device, port=port)
 
     def InitialiseOnce(self):
         print "# EtherIP Initialisation"
@@ -32,7 +29,9 @@ class EtherIPInit(Substitution, Device):
         name=Simple("Name"),  
         device = Simple("PV Prefix"),
         port = Simple("Port Name"),
-        ip = Simple("IP Port of PLC"))
+        ip = Simple("IP Port of PLC"),
+        PLCinfo = Simple ("Add PLC information PVs -- do only once per device", bool)
+    )
 
 class bo(AutoSubstitution):
     TemplateFile = "ether_ip_bo.template"
@@ -54,3 +53,7 @@ class mbboDirect(AutoSubstitution):
 
 class mbbiDirect(AutoSubstitution):
     TemplateFile = "ether_ip_mbbiDirect.template"
+
+class _PLCinfo(AutoSubstitution):
+    ''' Template file with simple PVs collecting PLC information '''
+    TemplateFile = "ether_ip_plcInfo.template"
