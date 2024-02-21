@@ -1,4 +1,5 @@
-# Makefile
+# configure Makefile for ether_ip
+#
 
 TOP=..
 
