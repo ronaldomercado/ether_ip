@@ -1,4 +1,5 @@
-#Makefile at top of application tree
+# Makefile at top of application tree for ether_ip.
+#
 TOP = .
 
 include $(TOP)/configure/CONFIG
