@@ -6,5 +6,6 @@ include $(TOP)/configure/CONFIG
 
 DIRS := src
 DIRS += Db
+DIRS += opi
 
 include $(TOP)/configure/RULES_DIRS
