@@ -1,3 +1,5 @@
+# CONFIG file for ether_ip
+#
 #CONFIG
 #INSTALL_LOCATION_APP=$(TOP)/../..
 include $(TOP)/configure/CONFIG_APP
