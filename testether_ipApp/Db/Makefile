@@ -1,3 +1,5 @@
+# ether_ip module testether_ip Db Makefile
+#
 # Makefile.Host
 TOP = ../..
 
