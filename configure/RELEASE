@@ -1,3 +1,5 @@
+# RELEASE file for ether_ip
+#
 #RELEASE Location of external products
 # Run "gnumake clean uninstall install" in the application
 # top directory each time this file is changed.
