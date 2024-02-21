@@ -1,4 +1,5 @@
-# Makefile
+# src Makefile for ether_ip
+#
 TOP = ../..
 
 include $(TOP)/configure/CONFIG
