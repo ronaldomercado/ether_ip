@@ -1,5 +1,6 @@
 ## generated from EPICS build
 bin/
+data/
 db/
 dbd/
 include/
