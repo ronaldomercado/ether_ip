@@ -3,10 +3,10 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 2328
-y 623
+x 1808
+y 697
 w 230
-h 95
+h 120
 font "arial-medium-r-18.0"
 ctlFont "arial-medium-r-18.0"
 btnFont "arial-medium-r-18.0"
@@ -34,7 +34,7 @@ release 0
 x 5
 y 5
 w 220
-h 80
+h 105
 
 beginGroup
 
@@ -47,7 +47,7 @@ release 0
 x 5
 y 5
 w 220
-h 80
+h 105
 
 beginGroup
 
@@ -60,7 +60,7 @@ release 0
 x 5
 y 20
 w 220
-h 65
+h 90
 lineColor index 14
 fill
 fillColor index 5
@@ -130,7 +130,7 @@ release 0
 x 15
 y 30
 w 200
-h 45
+h 70
 
 beginGroup
 
@@ -141,7 +141,7 @@ major 4
 minor 0
 release 0
 x 15
-y 55
+y 80
 w 200
 h 20
 
@@ -154,7 +154,7 @@ major 4
 minor 0
 release 0
 x 195
-y 55
+y 80
 w 20
 h 20
 controlPv "$(device):PLCHEALTHY"
@@ -171,7 +171,7 @@ major 10
 minor 0
 release 0
 x 15
-y 55
+y 80
 w 170
 h 20
 controlPv "$(device):PLCSTATUS"
@@ -194,7 +194,7 @@ major 10
 minor 0
 release 0
 x 15
-y 30
+y 55
 w 200
 h 20
 controlPv "$(device):PLCNAME"
@@ -204,6 +204,26 @@ bgColor index 10
 fill
 font "arial-bold-r-14.0"
 fontAlign "center"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 15
+y 30
+w 200
+h 20
+font "arial-bold-r-14.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "$(device)"
+}
 endObjectProperties
 
 endGroup
