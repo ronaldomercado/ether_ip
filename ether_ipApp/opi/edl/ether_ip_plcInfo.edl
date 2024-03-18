@@ -3,10 +3,10 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 1357
-y 459
+x 1810
+y 718
 w 300
-h 200
+h 225
 font "arial-medium-r-18.0"
 ctlFont "arial-medium-r-18.0"
 btnFont "arial-medium-r-18.0"
@@ -52,7 +52,7 @@ release 0
 x 30
 y 40
 w 240
-h 100
+h 125
 fgColor index 14
 bgColor index 0
 topShadowColor index 1
@@ -70,7 +70,7 @@ major 4
 minor 1
 release 0
 x 90
-y 165
+y 190
 w 110
 h 25
 fgColor index 46
