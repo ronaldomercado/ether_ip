@@ -11,4 +11,4 @@
 EPICS_BASE=/dls_sw/epics/R3.14.12.7/base
 
 # Use local settings (if present)
--include $(TOP)/../RELEASE.local
+-include $(TOP)/configure/RELEASE.local

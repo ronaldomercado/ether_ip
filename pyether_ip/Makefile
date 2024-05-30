@@ -4,15 +4,15 @@ install: build
 
 build: copy_eip_source
 	# pip wheel . -w wheels
-	pipenv install
-	pipenv run python setup.py sdist bdist_wheel
+	pip install .
+	python setup.py build
 
 
 test2: clean copy_eip_source
 	python setup.py sdist
 	pip install dist/pyether_ip-0.0.1a1.tar.gz
 	python -c 'from pyether_ip.eip_driver import EIPDriver;drv = EIPDriver("172.23.243.78", level=10);a = drv.write("STRING39_Test", b"hello", dtype="string")'
-	
+
 
 copy_eip_source:
 	mkdir -p src/ether_ip
