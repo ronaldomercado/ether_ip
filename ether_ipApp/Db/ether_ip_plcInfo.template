@@ -6,9 +6,9 @@
 # % macro, port,         Mandatory.  EtherIP port name.
 #
 # % macro, healthy_ZNAM, Optional.   Defaults to NotHealthy.   String to display when healthy bit is not set (ZNAM field on PLCHEALTHY bi record).  Max 19 characters.
-# % macro, healthy_ZSV,  Optional.   Defaults to NO_ALARM.     Alarm status when healthy bit is not set (ZSV field on PLCHEALTHY bi record).  Must be one of the EPICS alarm severity names.
+# % macro, healthy_ZSV,  Optional.   Defaults to MAJOR.        Alarm status when healthy bit is not set (ZSV field on PLCHEALTHY bi record).  Must be one of the EPICS alarm severity names.
 # % macro, healthy_ONAM, Optional.   Defaults to Healthy.      String to display when healthy bit is set (ONAM field on PLCHEALTHY bi record).  Max 19 characters.
-# % macro, healthy_OSV,  Optional.   Defaults to NotHealthy.   Alarm status when healthy bit is set (OSV field on PLCHEALTHY bi record).  Must be one of the EPICS alarm severity names.
+# % macro, healthy_OSV,  Optional.   Defaults to NO_ALARM.     Alarm status when healthy bit is set (OSV field on PLCHEALTHY bi record).  Must be one of the EPICS alarm severity names.
 #
 # This associates BOY screens with the template.
 # % gui, $(name=), boydetail, ether_ipApp_opi/plcInfo_embed.opi, device=$(device)
@@ -39,7 +39,7 @@ record(bi, "$(device):PLCHEALTHY") {
     field(DTYP, "EtherIP")
     field(INP, "@$(port) PLC_Healthy_Flag")
     field(ZNAM, "$(healthy_ZNAM=NotHealthy)")
-    field(ZSV, "$(healthy_ZSV=NO_ALARM)")
+    field(ZSV, "$(healthy_ZSV=MAJOR)")
     field(ONAM, "$(healthy_ONAM=Healthy)")
-    field(OSV, "$(healthy_OSV=MAJOR)")
+    field(OSV, "$(healthy_OSV=NO_ALARM)")
 }
