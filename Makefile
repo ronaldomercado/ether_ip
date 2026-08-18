@@ -15,7 +15,7 @@ testether_ipApp_DEPEND_DIRS = ether_ipApp
 DIRS += iocBoot
 iocBoot_DEPEND_DIRS = configure
 
-DIRS += pyether_ip
+#DIRS += pyether_ip
 
 include $(TOP)/configure/RULES_TOP
 
